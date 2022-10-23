@@ -1,0 +1,239 @@
+/*Random Maze Generator
+Mike L. Shane F.
+*/
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class RandomMazeGenerator{
+	private int WIDTH=640;			//Get Size from computer
+	private int HEIGHT=480;			//Get Size from computer
+	
+	private JFrame appFrame;
+	private JPanel appPanel,mazePanel;
+	private JLabel appLabel,mazeLabel;
+	private JTextField menuText;
+	public JButton easy,normal,difficult,hardkore,start;
+	private int deadEnds;
+	int diff=0;
+	int hSize = 30;
+	int vSize = 30;
+	final int FINHSIZE=30;
+	final int FINVSIZE=30;
+	final int EASY=1;
+	final int NORMAL=2;
+	final int DIFFICULT=3;
+	final int HARDKORE=4;
+	final int START=5;
+	private Canvas c;
+	private Tile[][]tile;
+	Tile [] tiles= new Tile [16];
+	JLabel [][] mazeBoard=new JLabel[hSize][vSize];
+	
+	
+	
+	//GUI
+	public RandomMazeGenerator(){
+						
+		c=new Canvas();
+		c.setSize(new Dimension(WIDTH,HEIGHT));
+		
+		appFrame= new JFrame ("Random Maze Generator");
+		appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		appLabel= new JLabel ("Enter Your Name: ");
+		menuText= new JTextField (20);
+		//menuText.addActionListener(new GameStart());
+		
+		mazeLabel= new JLabel();
+		mazeLabel.setPreferredSize (new Dimension(7,7));	
+	
+		easy= new JButton();
+		easy.addActionListener(new ButtonListener());
+		
+		normal= new JButton ();
+		normal.addActionListener(new ButtonListener());
+		
+		difficult= new JButton();
+		difficult.addActionListener(new ButtonListener());
+		
+		hardkore= new JButton ();
+		hardkore.addActionListener(new ButtonListener());
+		
+		start=new JButton();
+		start.addActionListener(new ButtonListener());
+
+		
+		appPanel= new JPanel();
+		appPanel.setPreferredSize (new Dimension(WIDTH,HEIGHT));
+		appPanel.setBackground(Color.red);
+		appPanel.add(appLabel);
+		appPanel.add(menuText);
+		appPanel.add(easy);
+		appPanel.add(normal);
+		appPanel.add(difficult);
+		appPanel.add(hardkore);
+		appPanel.add(start);
+		appPanel.add(c);
+		appPanel.add(mazeLabel);
+		
+		
+		
+		tiles[0]= new Tile (true ,true ,true ,true,new ImageIcon("t00.jpg") );
+		tiles[1]= new Tile (true ,true ,false,false,new ImageIcon("t01.jpg"));
+		tiles[2]= new Tile (false,false,true ,true,new ImageIcon("t02.jpg") );
+		tiles[3]= new Tile (true ,false,true ,true,new ImageIcon("t03.jpg") );
+		tiles[4]= new Tile (true ,true ,false,true,new ImageIcon("t04.jpg") );
+		tiles[5]= new Tile (true ,true ,true ,false,new ImageIcon("t05.jpg") );
+		tiles[6]= new Tile (false,true ,true ,true,new ImageIcon("t06.jpg") );
+		tiles[7]= new Tile (true ,false,true ,false,new ImageIcon("t07.jpg") );
+		tiles[8]= new Tile (true ,false,false,true,new ImageIcon("t08.jpg") );
+		tiles[9]= new Tile (false,true ,true ,false,new ImageIcon("t09.jpg") );
+		tiles[10]=new Tile (false,true ,false,true,new ImageIcon("t10.jpg") );
+		tiles[11]=new Tile (true ,false,false,false,new ImageIcon("t11.jpg") );
+		tiles[12]=new Tile (false,true ,false,false,new ImageIcon("t12.jpg") );
+		tiles[13]=new Tile (false,false,true ,false,new ImageIcon("t13.jpg") );
+		tiles[14]=new Tile (false,false,false,true,new ImageIcon("t14.jpg") );
+		tiles[15]=new Tile (false,false,false,false,new ImageIcon("t15.jpg") );
+		
+		//Set Up Array of Labels
+		
+		JPanel mazePanel= new JPanel (new GridLayout(hSize,vSize));
+		mazePanel.setPreferredSize(new Dimension(hSize,vSize));
+		for (int panelAcross = 0; panelAcross<hSize;panelAcross++){
+			for (int panelDown = 0; panelDown<vSize;panelDown++){
+				
+				//mazeBoard[panelDown][panelAcross]=new JLabel(tile[panelAcross][panelDown].image);
+				mazeBoard[panelAcross][panelDown]=new JLabel();
+				mazePanel.add(mazeBoard[panelAcross][panelDown]);
+
+			}
+		}
+		appPanel.add(mazePanel);
+		appFrame.getContentPane().add(appPanel);	
+	}
+
+		
+
+
+	//Displaying the App Frame
+	
+	public void display(){
+		
+		appFrame.pack();
+		appFrame.show();
+		
+	}
+		
+	public void easy(){
+		Graphics g=c.getGraphics();
+		g.drawString("Easy",20,20);
+	}
+	public void normal (){
+		Graphics g=c.getGraphics();
+		g.drawString("Normal",30,30);
+	}
+	public void difficult(){
+		Graphics g=c.getGraphics();
+		g.drawString("Hard",40,40);
+	}
+	public void hardkore(){
+		Graphics g=c.getGraphics();
+		g.drawString("HardKore",50,50);
+	}
+	public void start(){
+		Graphics g=c.getGraphics();
+		g.drawString("Starting Game...",100,100);
+	}
+
+		
+	
+
+
+	
+	public void createWorld(){
+		tile[0][0]=tiles[(int)(Math.random()*(15-0))+0];
+		for (int across = 0; across<=hSize;across++){
+			for (int down = 0; down<=vSize;down++){
+				int tileNum=(int)(Math.random()*(16-0))+0;
+				tile[across][down]=tiles[tileNum];
+				while (down==0){
+					if (across==0) tile[0][0]=tiles[(int)(Math.random()*(15-0))+0];
+					else if (tile[across-1][down].east && tile[across][down].west)	break;							
+				}
+				while (down>0){
+					if ((tile[across-1][down].east && tile[across][down].west) ||
+						 (tile[across][down-1].south && tile[across][down].north)) break;
+					else if (!tile [across-1][down].east && !tile[across][down-1].south) tile[across][down]=tiles[15];
+				}//End While
+				createWorld();
+				
+			}//Closing For
+		}//Ending For2
+
+	
+	
+	}//End Maze Setup
+
+	//maze output
+	public void drawMaze(){
+		for (int panelAcross = 0; panelAcross<=hSize;panelAcross++){
+			for (int panelDown = 0; panelDown<=vSize;panelDown++){
+				mazeBoard[panelDown][panelAcross]=new JLabel(tile[panelAcross][panelDown].image);		
+				
+			}
+		}
+	}
+	
+		drawmazePanel();
+	
+	
+	//User methods
+	
+	
+	//Action Listeners//
+
+	class ButtonListener implements ActionListener{
+	public void actionPerformed(ActionEvent e){
+		if (e.getSource()==easy){
+			easy();
+		}else if (e.getSource()==normal){
+			normal();
+		}else if (e.getSource()==difficult){
+			difficult();
+		}else if (e.getSource()==hardkore){
+			hardkore();
+		}else if (e.getSource()==start){
+			start();
+			}
+		}
+	}
+
+
+
+	class ClickListener implements MouseListener{
+		public void mouseClicked(MouseEvent clicker){
+			
+			if (diff==EASY){
+				easy();
+			}else if (diff==NORMAL){
+				normal();
+			}else if (diff==DIFFICULT){
+				difficult();
+			}else if (diff==HARDKORE){
+				hardkore();
+			}else if (diff==START){
+				start();
+			}
+		}
+		
+		public void mouseReleased(MouseEvent release){}
+	
+		public void mousePressed(MouseEvent press){}
+	
+		public void mouseExited(MouseEvent exit){}
+	
+		public void mouseEntered(MouseEvent enter){}
+		}
+	}
